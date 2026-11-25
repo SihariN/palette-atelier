@@ -17,11 +17,11 @@ export default function ImagePreview({
   return (
     <div className="relative overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)]">
       <div className="relative flex min-h-[280px] items-center justify-center bg-[#F5F1EA] p-4">
-        <img
+        <image>
           src={imageUrl}
-          alt="Uploaded inspiration"
-          className="max-h-[420px] max-w-full rounded-xl object-contain"
-        />
+          alt=&quot;Uploaded inspiration&quot;
+          className=&quot;max-h-[420px] max-w-full rounded-xl object-contain&quot;
+        </image>
 
         <button
           onClick={onRemove}
