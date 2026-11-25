@@ -14,12 +14,13 @@ import {
   Sparkles,
   Heart,
   Keyboard,
-  RotateCcw,
 } from "lucide-react";
 
 export default function PaletteStudio() {
   const [harmony, setHarmony] = useState<ColorHarmony>("analogous");
-  const [colors, setColors] = useState<PaletteColor[]>([]);
+  const [colors, setColors] = useState<PaletteColor[]>(() =>
+    generatePalette("analogous"),
+  );
   const [favorites, setFavorites] = useState<PaletteColor[][]>([]);
   const [isSaved, setIsSaved] = useState(false);
 
@@ -29,10 +30,6 @@ export default function PaletteStudio() {
     setIsSaved(false);
   }, [harmony]);
 
-  // Initial palette
-  useEffect(() => {
-    setColors(generatePalette("analogous"));
-  }, []);
 
   // Change harmony and immediately generate
   function handleHarmonyChange(newHarmony: ColorHarmony) {
