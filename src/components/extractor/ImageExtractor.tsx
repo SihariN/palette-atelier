@@ -19,6 +19,8 @@ import {
   type ExtractedColor,
 } from "@/lib/image-extraction";
 
+import { savePalette as savePaletteToLibrary } from "@/lib/palette-storage";
+
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
@@ -213,35 +215,30 @@ export default function ImageExtractor() {
     }
   }, [isImageReady]);
 
-  // Save the extracted palette to localStorage.
-  const savePalette = () => {
-    if (colors.length === 0) return;
+  // Save the extracted palette to the shared library.
+const savePalette = () => {
+  if (colors.length === 0) return;
 
-    try {
-      const existing = JSON.parse(
-        localStorage.getItem("palette_atelier_extracted") || "[]",
-      );
+  try {
+    const now = new Date().toISOString();
 
-      const palette = {
-        id: crypto.randomUUID(),
-        name: fileName.replace(/\.[^/.]+$/, "") || "Extracted palette",
-        colors: colors.map((color) => color.hex),
-        source: "image-extractor",
-        createdAt: new Date().toISOString(),
-      };
+    savePaletteToLibrary({
+      id: crypto.randomUUID(),
+      name: fileName.replace(/\.[^/.]+$/, "") || "Extracted palette",
+      colors: colors.map((color) => color.hex),
+      source: "image-extractor",
+      createdAt: now,
+      updatedAt: now,
+    });
 
-      localStorage.setItem(
-        "palette_atelier_extracted",
-        JSON.stringify([palette, ...existing]),
-      );
-
-      setSuccess("Palette saved to your collection!");
-      setError("");
-    } catch {
-      setError("Couldn&apos;t save your palette. Please try again.");
-      setSuccess("");
-    }
-  };
+    setSuccess("Palette saved to My Library!");
+    setError("");
+  } catch (err) {
+    console.error("Could not save extracted palette:", err);
+    setError("Couldn&apos;t save your palette. Please try again.");
+    setSuccess("");
+  }
+};
 
   return (
     <div className="space-y-8">
