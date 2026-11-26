@@ -13,6 +13,7 @@ import {
   Menu,
   Palette,
   PanelsTopLeft,
+  Paintbrush,
   Settings,
   Sparkles,
   X,
@@ -37,6 +38,11 @@ const navigation = [
         name: "Moodboard Creator",
         href: "/atelier/moodboards",
         icon: PanelsTopLeft,
+      },
+      {
+        name: "Canvas Editor",
+        href: "/atelier/canvas",
+        icon: Paintbrush,
       },
       {
         name: "Accessibility",
