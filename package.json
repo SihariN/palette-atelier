@@ -11,6 +11,8 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@supabase/ssr": "^0.12.7",
+    "@supabase/supabase-js": "^2.119.2",
     "fabric": "^7.4.0",
     "framer-motion": "^14.14.0",
     "lucide-react": "^1.78.0",

@@ -1,23 +1,27 @@
 
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Accessibility,
   ChevronLeft,
   Image,
   LayoutDashboard,
   Library,
+  LogOut,
   Menu,
   Palette,
   PanelsTopLeft,
   Paintbrush,
   Settings,
   Sparkles,
+  UserRound,
   X,
 } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
+import type { User } from "@supabase/supabase-js";
 
 const navigation = [
   {
@@ -74,7 +78,55 @@ export default function WorkspaceShell({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const supabase = createClient();
+
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [accountLoading, setAccountLoading] = useState(true);
+  const [loggingOut, setLoggingOut] = useState(false);
+  const [logoutError, setLogoutError] = useState("");
+
+  useEffect(() => {
+    async function loadUser() {
+      const { data, error } = await supabase.auth.getUser();
+
+      if (!error) {
+        setUser(data.user);
+      }
+
+      setAccountLoading(false);
+    }
+
+    loadUser();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      setAccountLoading(false);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [supabase]);
+
+  async function handleLogout() {
+    setLoggingOut(true);
+    setLogoutError("");
+
+    const { error } = await supabase.auth.signOut();
+
+    if (error) {
+      setLogoutError("Unable to sign out. Please try again.");
+      setLoggingOut(false);
+      return;
+    }
+
+    router.replace("/");
+    router.refresh();
+  }
 
   function isActive(href: string) {
     if (href === "/atelier") {
@@ -172,6 +224,45 @@ export default function WorkspaceShell({
           </p>
         </div>
 
+        {/* Signed-in account */}
+        <div className="mt-4 rounded-2xl border border-[#e8e5dc] bg-[#fffefa] p-3">
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#e8ecdf] text-[#78836a]">
+              <UserRound size={17} />
+            </div>
+
+            <div className="min-w-0 flex-1">
+              <p className="text-[10px] font-medium tracking-[0.12em] text-[#aaa69a]">
+                SIGNED IN AS
+              </p>
+
+              <p
+                className="mt-1 truncate text-xs font-medium text-[#55564d]"
+                title={user?.email ?? ""}
+              >
+                {accountLoading
+                  ? "Loading account..."
+                  : user?.email ?? "Account unavailable"}
+              </p>
+            </div>
+          </div>
+
+          {logoutError && (
+            <p role="alert" className="mt-3 text-[11px] text-red-600">
+              {logoutError}
+            </p>
+          )}
+
+          <button
+            onClick={handleLogout}
+            disabled={loggingOut || accountLoading || !user}
+            className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-[#e8e5dc] px-3 py-2.5 text-xs font-medium text-[#858479] transition hover:border-[#d5aaa3] hover:bg-[#f9eeeb] hover:text-[#9b655d] disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <LogOut size={14} />
+            {loggingOut ? "Signing out..." : "Sign out"}
+          </button>
+        </div>
+
         <p className="mt-5 text-center text-[10px] text-[#aaa69a]">
           PALETTE ATELIER · V1.0
         </p>
@@ -218,3 +309,4 @@ export default function WorkspaceShell({
     </div>
   );
 }
+
